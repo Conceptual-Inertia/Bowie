@@ -18,3 +18,5 @@ A web-based, visualized, Turing-equivalent, extensible &amp; programmable stack-
 
 ## creds
 fortune & cowsay
+
+[!creds](https://github.com/Conceptual-Inertia/ConceptualWeb/raw/master/BowiesTheorem.png)
