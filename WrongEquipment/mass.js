@@ -1,14 +1,14 @@
 
 var instr_num, par1, par2, par3
-var con = new array();
+var con = new array()
 
 var reg = new array()
-let get = function(index){
+function get(index){
   if (index < 0) return con[index + 1]
   if (typeof(reg[index]) == undefined) return 0
   return reg[index]
 }
-let set = function(index, value){
+function set(index, value){
   reg[index] = value
 }
 
