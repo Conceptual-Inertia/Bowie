@@ -12,7 +12,7 @@ function set(index, value){
   reg[index] = value
 }
 
-let eval = function(){
+let instruction = function(){
   this.INSTR = {
     'ADD': this.add(),
     'SUB': this.sub(),
@@ -69,10 +69,10 @@ let eval = function(){
     set(par1, !get(par2))
   }
   this.inc = function(){
-    set(par1, get(par1)++)
+    set(par1, get(par1) + 1)
   }
   this.dec = function(){
-    set(par1, get(par1)--)
+    set(par1, get(par1) - 1)
   }
   this.load = function(){
     set(par1, get(par2))
@@ -80,6 +80,11 @@ let eval = function(){
   this.print = function(){
     alert(get(par1))
   }
+}
+
+
+function eval() {
+  // TODO
 }
 
 function run() {
