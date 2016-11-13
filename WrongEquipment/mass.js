@@ -8,11 +8,12 @@ function get(index){
   if (typeof(reg[index]) == undefined) return 0
   return reg[index]
 }
+
 function set(index, value){
   reg[index] = value
 }
 
-let eval = function(){
+let Eval = function(){
   this.INSTR = {
     'ADD': this.add(),
     'SUB': this.sub(),
