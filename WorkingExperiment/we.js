@@ -24,7 +24,7 @@ let WEStack = function () {
 
 // instruction-function prototypes
 
-let WEInstructionOps = function (stack) {
+let WEInstructionOps = function (instruction, stack) {
   this.WEINSTR = {
     'ADD': this.weAdd(stack),
     'MUL': this.weMul(stack),
@@ -106,11 +106,12 @@ let WEInstructionOps = function (stack) {
   this.weConst = function (stack) {
     stack.stackPush()
   }
+  this.WEINSTR[instruction](stack)
 }
 
-function evaluate() {
-  // TODO
-}
+let globalStack = new WEStack()
+let localStack = new WEStack()
+
 
 function run() {
   // TODO
@@ -120,6 +121,9 @@ function readIn() {
   // TODO
 }
 
-function main() {
-  // TODO
+function showStack(sstack) {
+  for (let i = 0; i < sstack.stack.length; i++) {
+    console.log(sstack.stack[i])
+  }
+  return
 }
