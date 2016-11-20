@@ -1,20 +1,14 @@
-let mass = function(){
-  this.instr_num = 0
-  this.par1 = 0
-  this.par2 = 0
-  this.par3 = 0
-  this.con = new array()
 
-  this.reg = new array()
-  this.get = function(index){
+var instr, par1, par2, par3
+var con = new array(), reg = new array()
+function get(index){
     if (index < 0) return con[index + 1]
     if (typeof(reg[index]) == undefined) return 0
     return reg[index]
-  }
+}
 
-  this.set = function(index, value){
+function set(index, value){
     reg[index] = value
-  }
 }
 
 let Eval = function(){
@@ -87,9 +81,9 @@ let Eval = function(){
   }
 }
 
-
 function eval() {
-  // TODO
+  Eval.INSTR[instr]()
+  todo
 }
 
 function run() {
