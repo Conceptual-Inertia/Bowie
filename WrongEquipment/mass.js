@@ -10,7 +10,7 @@ function set(index, value){
     reg[index] = value
 }
 
-let Eval = function(){
+var Eval = function(){
   this.INSTR = {
     'ADD': this.add(),
     'SUB': this.sub(),
