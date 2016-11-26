@@ -73,11 +73,11 @@ var Eval = function(){
   this.dec = function(){
     set(par1, get(par1) - 1)
   }
-  this.load = function(){
-    set(par1, get(par2))
-  }
-  this.load = function(){
+  this.loadv = function(){
     set(par1, par2)
+  }
+  this.movev = function(){
+    set(par1, get(par2))
   }
   this.print = function(){
     alert(get(par1))
@@ -86,7 +86,6 @@ var Eval = function(){
 
 function eval() {
   Eval.INSTR[instr]()
-  todo
 }
 
 function run() {
