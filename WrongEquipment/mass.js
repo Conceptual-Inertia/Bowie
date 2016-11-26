@@ -1,9 +1,8 @@
 
 var instr, par1, par2, par3
-var con = new array(), reg = new array()
+var reg = new array()
 function get(index){
-    if (index < 0) return con[index + 1]
-    if (typeof(reg[index]) == undefined) return 0
+    if (reg.length <= index) return 0
     return reg[index]
 }
 
@@ -28,6 +27,7 @@ let Eval = function(){
     'INC': this.inc(),
     'DEC': this.dec(),
     'LOAD':this.loadv(),
+    'MOVE':this.movev(),
     'PRINT': this.printv()
   }
 
@@ -75,6 +75,9 @@ let Eval = function(){
   }
   this.load = function(){
     set(par1, get(par2))
+  }
+  this.load = function(){
+    set(par1, par2)
   }
   this.print = function(){
     alert(get(par1))
