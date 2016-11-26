@@ -1,0 +1,10 @@
+body {
+ background: grey;
+ display: block;
+ padding: 50px;
+}
+div.container-fluid {
+ background: white;
+ display: block;
+ padding: 150px;
+}

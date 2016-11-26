@@ -1,0 +1,383 @@
+<html>
+ <head>
+
+  <meta charset="utf8">
+  <title>WorkingEquipment</title>
+
+  <!-- jQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+  <!--custom-->
+  <link rel="stylesheet" href="style.css">
+  <!--tests-->
+  <script>
+var GS = []
+var gsPointer = 0
+var LS = []
+var lsPointer = 0
+var timerStartMs = 0
+var dispatchTime = []
+// helper functions
+
+function onError(msg, isSerious) {
+  if(isSerious) { alert("SERIOUS ERROR: " + msg); } else { console.log("ERROR: " + msg); }
+}
+
+function getValFromInput(elementId) { // needs jQuery
+  return $("#" + elementId).val()
+}
+
+function timerStart() {
+    timerStartMs = (new Date()).getTime()
+}
+
+function timerStop() {
+    var duration = timerStartMs - (new Date()).getTime()
+    dispatchTime.push(duration)
+    return duration
+}
+
+function printStack() {
+    var reverseLocalStack = []
+    for(var i = LS.length - 1; i >= 0; i--) {
+        reverseLocalStack.push('<tr>'+'<th scope="row">'+ String(LS.length - i) +'</th>' +'<td>' + LS[i] + '</td></tr>')
+    }
+
+    var reverseGlobalStack = []
+    for(var j = GS.length - 1; j >= 0; j--) {
+        reverseGlobalStack.push('<tr>'+'<th scope="row">'+ String(LS.length - j) +'</th>' +'<td>' + GS[j] + '</td></tr>')
+    }
+
+    var concatLs = ''
+    var concatGs = ''
+    concatLs = '<table class="table table-hover"><caption>Local Stack</caption><thead><tr><th>#</th><th>Element</th></thead><tbody>'
+    concatGs = '<br><table class="table table-hover"><caption>Global Stack</caption><thead><tr><th>#</th><th>Element</th></thead><tbody>'
+    for(el in reverseLocalStack) { concatLs += reverseLocalStack[el]; }
+    for(eg in reverseGlobalStack) { concatGs += reverseGlobalStack[eg]; }
+    concatLs += '</tbody></table><br>'
+    concatGs += '</tbody></table><br>'
+    $("#wes-real-time-stack").html(
+        concatLs + concatGs
+    )
+}
+
+function getAvgDispatchTime() {
+    var sum = 0
+    for(times in dispatchTime) {
+        sum += dispatchTime[times]
+    }
+    return sum / dispatchTime.length
+}
+
+function displayTelemetry(duration) {
+    console.log("duration:" + Math.abs(duration))
+    $("#wes-last-dispatch-time").html(Math.abs(duration))
+    console.log("avg dispatch time:" + Math.abs(getAvgDispatchTime()))
+    $("#wes-avg-dispatch-time").html(Math.abs(getAvgDispatchTime()))
+    console.log("dispatch amount:" + dispatchTime.length)
+    $("#wes-total-dispatch-amount").html(dispatchTime.length)
+}
+
+function updateHistory(name, opr) {
+    console.log('updating history...')
+    var prev = $("#wes-execution-history").html()
+    prev += '<br>' + name + ' ' + opr + '<br>'
+    $("#wes-execution-history").html(prev)
+}
+
+function onStart() {
+    console.log("starting timer")
+    timerStart()
+}
+
+function onReturn(name, opr) {
+    var d = timerStop()
+    console.log("printing stack")
+    printStack()
+    console.log("displaying telemetry")
+    displayTelemetry(d)
+    updateHistory(name, opr)
+}
+
+function clearAll() { 
+    GS = []
+    LS = []
+    dispatchTime = []
+    displayTelemetry(0)
+    printStack()
+}
+
+function clearDispatcherHistory() {
+    $("#wes-execution-history").html('<br>')
+}
+
+
+// onclick functions
+
+function onclickStore() {
+    onStart()
+    var input = getValFromInput("store-opr")
+    LS.push(input)
+    lsPointer++
+    onReturn('STORE', input)
+}
+
+function onclickIsMatch() {
+    onStart()
+    if(LS.length > 0) {
+        var input = getValFromInput("ismatch-opr")
+        if(input.equals(String(LS.pop()))) {
+            LS.push('1')
+        } else { LS.push('0'); }
+    } else {
+        onError("IsMatch: no comparison", 1)
+    } 
+    onReturn('ISMATCH', input)
+}
+
+function onclickAdd() {
+    onStart()
+    if(LS.length > 1) {
+        LS.push(String(parseInt(LS.pop()) + parseInt(LS.pop())))
+    } else {
+        onError("Add: no enough elements in stack", 1)
+    }
+    onReturn('ADD', '')
+}
+
+function onclickSubtr() {
+    onStart()
+    if(LS.length > 1) {
+        LS.push(String(parseInt((LS.pop()) - parseInt(LS.pop()))))
+    } else {
+        onError("Subtr: no enough elements in stack", 1)
+    }
+    onReturn('SUBTR', '')
+}
+
+function onclickMul() {
+    onStart()
+    if(LS.length > 1) {
+        LS.push(String(parseInt(LS.pop()) * parseInt(LS.pop())))
+    } else {
+        onError("Mul: no enough elements in stack", 1)
+    }
+    onReturn('MUL', '')
+}
+
+function onclickDiv() {
+    onStart()
+    if(LS.length > 1) {
+        LS.push(String(parseInt(LS.pop()) / parseInt(LS.pop())))
+    } else {
+        onError("Div: no enough elements in stack", 1)
+    }
+    onReturn('DIV', '')
+}
+
+function onclickInc() {
+    onStart()
+    if(LS.length > 0) {
+        var intVal = String(parseInt(LS.pop()) + 1)
+        LS.push(intVal)
+    } else {
+        onError("Inc: no enough elements in stack", 1)
+    }
+    onReturn('INC', '')
+}
+
+function onclickDec() {
+    onStart()
+    if(LS.length > 0) {
+        var intVal = String(parseInt(LS.pop()) - 1)
+        LS.push(intVal)
+    } else {
+        onError("Dec: no enough elements in stack", 1)
+    }
+    onReturn('DEC', '')
+}
+
+function onclickDup() {
+    onStart()
+    if(LS.length > 0) {
+        var ld = LS.pop()
+        LS.push(ld)
+        LS.push(ld)
+    } else {
+        onError("Dup: no enough elements in stack", 1)
+    }
+    onReturn('DUP', '')
+}
+
+function onclickPop() {
+    onStart()
+    if(LS.length > 0) {
+        LS.pop()
+    } else {
+        onError("Pop: no enough elements in stack", 1)
+    }
+    onReturn('POP', '')
+}
+
+function onclickAnd() {
+    onStart()
+    if(LS.length > 1) {
+        LS.push(String(parseInt(LS.pop()) & parseInt(LS.pop())))
+    } else {
+        onError("And: no enough elements in stack", 1)
+    }
+    onReturn('AND', '')
+}
+
+function onclickOr() {
+    onStart()
+    if(LS.length > 1) {
+        LS.push(String(parseInt(LS.pop()) | parseInt(LS.pop())))
+    } else {
+        onError("Or: no enough elements in stack", 1)
+    }
+    onReturn('OR', '')
+}
+
+function onclickXor() {
+    onStart()
+    if(LS.length > 1) {
+        LS.push(String(parseInt(LS.pop()) ^ parseInt(LS.pop())))
+    } else {
+        onError("Xor: no enough elements in stack", 1)
+    }
+    onReturn('XOR', '')
+}
+
+function onclickNe() {
+    onStart()
+    if(LS.length > 0) {
+        LS.push(String(~parseInt(LS.pop())))
+    } else {
+        onError("Ne: no enough elements in stack", 1)
+    }
+    onReturn('NE', '')
+}
+
+function onclickGstore() {
+    onStart()
+    if(LS.length > 0) {
+        GS.push(LS.pop())
+    } else {
+        onError("Gstore: no enough elements in stack", 1)
+    }
+    onReturn('GSTORE', '')
+}
+
+function onclickGload() {
+    onStart()
+    if(GS.length > 0) {
+        LS.push(GS.pop())
+    } else {
+        onError("Gload: no enough elements in stack", 1)
+    }
+    onReturn('GLOAD', '')
+}
+
+function onclickConcat() {
+    onStart()
+    if(LS.length > 0) {
+        LS.push(String(LS.pop()) + String(LS.pop()))
+    } else {
+        onError("Concat: no enough elements in stack", 1)
+    }
+    onReturn('CONCAT', '')
+}
+
+function onclickPrint() {
+    onStart()
+    if(LS.length > 0) {
+        printItem = LS.pop()
+        alert(printItem)
+        console.log(printItem)
+    } else {
+        onError("Print: no enough elements in stack", 1)
+    }
+    onReturn('PRINT', '')
+}
+
+function replay(instr) {
+    switch(instr) {
+        case 'store':
+         break
+    }
+//todo
+}
+
+$(document).ready(function() {
+    $('#wes-erase-history').click(function(){ clearDispatcherHistory(); })
+    $('#wes-reset').click(function(){ clearAll(); })
+    //$('#wes-replay').click(function(){ replay(); })
+})
+  </script>
+ </head>
+ <body>
+   <div class="container-fluid">
+    <h1>Stack-based Virtual Machine - Demo</h1>
+    <br>
+    <div class="col-md-6">
+        <h3>1) Assign Commands</h3>
+        <hr>
+        <ul>
+          <li><a><strong onclick="onclickStore()">STORE</strong></a> <input id="store-opr" type="text"></li>
+          <li><a><strong onclick="onclickIsMatch()">ISMATCH</strong></a> <input id="ismatch-opr" type="text"></li>
+          <li><a><strong onclick="onclickPrint()">PRINT</strong></a></li>
+          <li><a><strong onclick="onclickConcat()">CONCAT</strong></a></li>
+          <li><a><strong onclick="onclickAdd()">ADD</strong></a></li>
+          <li><a><strong onclick="onclickSubtr()">SUBTR</strong></a></li>
+          <li><a><strong onclick="onclickMul()">MUL</strong></a></li>
+          <li><a><strong onclick="onclickDiv()">DIV</strong></a></li>
+          <li><a><strong onclick="onclickInc()">INC</strong></a></li>
+          <li><a><strong onclick="onclickDec()">DEC</strong></a></li>
+          <li><a><strong onclick="onclickPop()">POP</strong></a></li>
+          <li><a><strong onclick="onclickDup()">DUP</strong></a></li>
+          <li><a><strong onclick="onclickAnd()">AND</strong></a></li>
+          <li><a><strong onclick="onclickOr()">OR</strong></a></li>
+          <li><a><strong onclick="onclickXor()">XOR</strong></a></li>
+          <li><a><strong onclick="onclickNe()">NE</strong></a></li>
+          <li><a><strong onclick="onclickGload()">GLOAD</strong></a></li>
+          <li><a><strong onclick="onclickGstore()">GSTORE</strong></a></li>
+        </ul>
+    </div>
+    <div class="col-md-6">
+     <div class="col-md-6">
+        <h4>2) Dispatcher History</h4>
+          <pre><code id="wes-execution-history">
+
+          </code></pre>
+          <br>
+          <p>Performance statistics</p>
+          <ul>
+            <li>Lastest dispatch time: <code id="wes-last-dispatch-time"></code></li>
+            <li>Average dispatch time: <code id="wes-avg-dispatch-time"></code></li>
+            <li>Total dispatch amount: <code id="wes-total-dispatch-amount"></code></li>
+          <br><hr>
+          <button id="wes-replay" class="btn btn-default">Replay History</button>&nbsp;
+          <br><br><button id="wes-erase-history" class="btn btn-warning">Erase History</button>
+     </div>
+     <div class="col-md-6">
+        <h4>3) Real-time results</h4>
+          <div id="wes-real-time-stack">
+
+          </div>
+          <br><hr>
+          <button id="wes-reset" class="btn btn-danger">Reset</button>
+     </div>  <!--div.col-md-6 internal-->
+    </div>  <!--div.col-md-6 external-->
+  </div>  <!--div.container-fluid-->
+  <br>
+  <div id="wes-footer" class="we-footer" >
+    <center> <br> <hr> <br> <p style="color:white;">Copyright &copy; Ruijie Fang</p> </center>
+ </body>
+</html>
